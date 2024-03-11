@@ -1,0 +1,54 @@
+class PDA:
+    def __init__(self):
+        self.states = {'q0', 'q1', 'q2', 'q3', 'q4', 'q5'}
+        self.input_alphabet = {'w', 'C'}
+        self.stack_alphabet = {'w', '$'}
+        self.transitions = {
+            ('q0', 'ε', 'ε'): {('q1', 'ε')},
+            ('q1', 'w', 'ε'): {('q1', 'w')},
+            ('q1', 'C', 'ε'): {('q2', 'ε')},
+            ('q2', 'C', 'ε'): {('q2', 'ε')},
+            ('q2', 'ε', 'ε'): {('q3', 'ε')},
+            ('q3', 'ε', 'ε'): {('q3', 'w')},
+            ('q3', 'ε', 'ε'): {('q4', 'ε')},
+            ('q3', 'w', 'w'): {('q3', 'ε')},
+            ('q3', 'w', 'ε'): {('q3', 'ε')},
+            ('q3', 'ε', '$'): {('q4', 'ε')},
+        }
+        self.start_state = 'q0'
+        self.accept_state = 'q4'
+        self.reject_state = 'q5'
+
+    def run(self, input_string):
+        stack = ['$']
+        current_state = self.start_state
+
+        for symbol in input_string:
+            if (current_state, symbol, stack[-1]) in self.transitions:
+                stack_pop = stack.pop()
+                for transition in self.transitions[(current_state, symbol, stack_pop)]:
+                    if transition[1] != 'ε':
+                        stack.extend(transition[1][::-1])
+                    current_state = transition[0]
+            else:
+                return False
+
+        if current_state == self.accept_state and stack[-1] == '$':
+            return True
+        else:
+            return False
+
+
+def main():
+    pda = PDA()
+    test_cases = ["abbCaabba", "abCaCba", "aaabCbaaa", "abcCcba", "abbCcbaa"]
+
+    for test_case in test_cases:
+        if pda.run(test_case):
+            print(f"'{test_case}' is accepted.")
+        else:
+            print(f"'{test_case}' is rejected.")
+
+
+if __name__ == "__main__":
+    main()
